@@ -1,7 +1,10 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
@@ -23,6 +26,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'reviews',
     'api',
+    'import_export',
 ]
 
 MIDDLEWARE = [
