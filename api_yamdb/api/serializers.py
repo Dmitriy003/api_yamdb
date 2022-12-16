@@ -22,7 +22,10 @@ class TitleSerializer(serializers.ModelSerializer):
         read_only=True, slug_field='slug'
     )
     genre = serializers.SlugRelatedField(
-        read_only=True, slug_field='slug'
+        read_only=True,
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
     )
 
     def validate(self, data):

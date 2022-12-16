@@ -11,7 +11,7 @@ from api.permissions import IsAdminOrReadOnly
 
 class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                         mixins.DestroyModelMixin, GenericViewSet):
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (AllowAny, IsAdminOrReadOnly)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter, )
@@ -21,7 +21,7 @@ class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
 class GenresViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                     mixins.DestroyModelMixin, GenericViewSet):
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (AllowAny, IsAdminOrReadOnly)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter, )
@@ -30,7 +30,7 @@ class GenresViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (AllowAny, IsAdminOrReadOnly)
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (filters.SearchFilter, )
