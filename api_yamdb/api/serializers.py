@@ -2,7 +2,7 @@ import datetime
 
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -22,7 +22,10 @@ class TitleSerializer(serializers.ModelSerializer):
         read_only=True, slug_field='slug'
     )
     genre = serializers.SlugRelatedField(
-        read_only=True, slug_field='slug'
+        read_only=True,
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
     )
 
     def validate(self, data):
@@ -33,3 +36,34 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    def create(self, validated_data):
+        if Review.objects.filter(
+            author=self.context['request'].user,
+            title=validated_data.get('title')
+        ).exists():
+            raise serializers.ValidationError(
+                'Вы уже оставляли отзыв на это произведение.')
+        review = Review.objects.create(**validated_data,)
+        return review
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+    )
+    
+    class Meta:
+        fields = '__all__'
+        model = Comment

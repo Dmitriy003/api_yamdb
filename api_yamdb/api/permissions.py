@@ -12,3 +12,4 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         return (request.user.is_staff
                 or request.method in permissions.SAFE_METHODS)
 #  request.user.is_superuser - для суперпользователя
+
