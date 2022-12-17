@@ -4,7 +4,9 @@ from import_export.admin import ImportExportModelAdmin
 
 from django.contrib import admin
 
-from reviews.models import Category, Genre, Title, GenreTitle
+from reviews.models import Category, Genre, Title, GenreTitle, User
+
+admin.site.register(User)
 
 
 class CategoryResource(resources.ModelResource):
