@@ -1,13 +1,19 @@
 from django.contrib.auth import admin
-from import_export import resources
-from import_export.admin import ImportExportModelAdmin
+# from import_export import resources
+# from import_export.admin import ImportExportModelAdmin
 
 from django.contrib import admin
 
-from reviews.models import Category, Genre, Title, GenreTitle
+from reviews.models import Category, Genre, Title, GenreTitle, User
+
+admin.site.register(User)
+admin.site.register(Genre)
+admin.site.register(Title)
+admin.site.register(Category)
+admin.site.register(GenreTitle)
 
 
-class CategoryResource(resources.ModelResource):
+""" class CategoryResource(resources.ModelResource):
     class Meta:
         model = Category
         fields = (
@@ -82,4 +88,4 @@ class GenreTitleAdmin(ImportExportModelAdmin):
     list_display = (
         'genre_id',
         'title_id',
-    )
+    ) """

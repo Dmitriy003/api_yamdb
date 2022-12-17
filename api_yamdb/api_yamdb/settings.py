@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'reviews',
     'api',
-    'import_export',
+    #'import_export',
 ]
 
 MIDDLEWARE = [
@@ -69,7 +69,9 @@ DATABASES = {
     }
 }
 
-# Password validation
+# Authorization settings
+
+AUTH_USER_MODEL = 'reviews.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -90,12 +92,24 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# Email emulator settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+
+DEFAULT_FROM_EMAIL = 'admin@yamdb.com'
 
 # Internationalization
 
