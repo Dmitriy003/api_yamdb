@@ -63,7 +63,7 @@ class TitleAdmin(ImportExportModelAdmin):
     resource_classes = [TitleResource]
     # list_display = [field.name for field in Title._meta.get_fields()
     #                 if not field.many_to_many]
-    list_display = [ ]
+    list_display = []
 
 
 class GenreTitleResource(resources.ModelResource):

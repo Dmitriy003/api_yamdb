@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-
 User = get_user_model()
 
 
@@ -50,7 +49,6 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    
     genre_id = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
@@ -67,19 +65,21 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
-    ''' Модель отзыва на произведение.'''
+    """ Модель отзыва на произведение."""
     title = models.ForeignKey(Title,
-        on_delete=models.CASCADE,
-        related_name='title',
-        verbose_name='Заголовок отзыва',
-        )
+                              on_delete=models.CASCADE,
+                              related_name='title',
+                              verbose_name='Заголовок отзыва',
+                              )
     text = models.TextField(verbose_name='Текст отзыва')
     author = models.ForeignKey(User,
-        on_delete=models.CASCADE,
-        related_name='review_author',
-        verbose_name='Автор')
+                               on_delete=models.CASCADE,
+                               related_name='review_author',
+                               verbose_name='Автор')
     score = models.PositiveSmallIntegerField(verbose_name='Оценка',
-        validators=[MinValueValidator(1), MaxValueValidator(10)])
+                                             validators=[MinValueValidator(1),
+                                                         MaxValueValidator(
+                                                             10)])
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
@@ -90,9 +90,9 @@ class Comment(models.Model):
     review = models.ForeignKey(Review, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Текст комментария')
     author = models.ForeignKey(User,
-        on_delete=models.CASCADE,
-        related_name='comment_author',
-        verbose_name='Автор комментария',)
+                               on_delete=models.CASCADE,
+                               related_name='comment_author',
+                               verbose_name='Автор комментария', )
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
