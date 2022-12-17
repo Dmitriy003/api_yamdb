@@ -1,8 +1,56 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-User = get_user_model()
+
+class User(AbstractUser):
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+    ROLES = [
+        (ADMIN, 'Administrator'),
+        (MODERATOR, 'Moderator'),
+        (USER, 'User'),
+    ]
+    email = models.EmailField(
+        verbose_name='Электронная почта',
+        unique=True,
+    )
+    username = models.CharField(
+        verbose_name='Имя пользователя',
+        max_length=150,
+        unique=True
+    )
+    role = models.CharField(
+        verbose_name='Уровень доступа',
+        max_length=50,
+        choices=ROLES,
+        default=USER
+    )
+    bio = models.TextField(
+        verbose_name='О себе',
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_user'
+            ),
+        ]
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def is_admin(self):
+        return self.is_superuser or self.role == "Administrator"
+
+    @property
+    def is_moder(self):
+        return self.role == 'Moderator'
 
 
 class Category(models.Model):
@@ -49,6 +97,7 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    
     genre_id = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
