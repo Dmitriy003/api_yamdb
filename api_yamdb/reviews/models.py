@@ -34,17 +34,15 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         default='-',
-        on_delete=models.SET_NULL,
+        on_delete=models.SET_DEFAULT,
         related_name='titles',
         verbose_name='категория',
-        null=True
     )
-    genre = models.ForeignKey(
-        'GenreTitle',
-        on_delete=models.SET_NULL,
+    genre = models.ManyToManyField(
+        Genre,
+        default='-',
         related_name='titles',
         verbose_name='категория',
-        null=True
     )
 
     def __str__(self):
@@ -52,8 +50,20 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    
+    genre_id = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        db_column='genre_id'
+    )
+    title_id = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        db_column='title_id'
+    )
+
+    def __str__(self):
+        return f'{self.genre_id} {self.title_id}'
 
 
 class Review(models.Model):
