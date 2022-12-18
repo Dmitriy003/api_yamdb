@@ -53,7 +53,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    '''Вьюсет модели Review.'''
+    """Вьюсет модели Review."""
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrHigherOrReadOnly,)
     pagination_class = PageNumberPagination
@@ -69,7 +69,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    '''Вьюсет модели Comment.'''
+    """Вьюсет модели Comment."""
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorOrHigherOrReadOnly,)
     pagination_class = PageNumberPagination

@@ -29,7 +29,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data['year'] > datetime.datetime.now().year:
-            raise serializers.ValidationError("произведение из будущего? нет")
+            raise serializers.ValidationError('произведение из будущего? нет')
         return data
 
     class Meta:
@@ -49,7 +49,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         ).exists():
             raise serializers.ValidationError(
                 'Вы уже оставляли отзыв на это произведение.')
-        review = Review.objects.create(**validated_data,)
+        review = Review.objects.create(**validated_data, )
         return review
 
     class Meta:
@@ -62,10 +62,11 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username',
     )
-    
+
     class Meta:
         fields = '__all__'
         model = Comment
+
 
 
 class UserSerializer(serializers.ModelSerializer):
