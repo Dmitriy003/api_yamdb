@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator, MinValueValidator
+)
 
 
 class User(AbstractUser):
@@ -8,24 +10,37 @@ class User(AbstractUser):
     MODERATOR = 'moderator'
     USER = 'user'
     ROLES = [
-        (ADMIN, 'Administrator'),
-        (MODERATOR, 'Moderator'),
-        (USER, 'User'),
+        (ADMIN, 'admin'),
+        (MODERATOR, 'moderator'),
+        (USER, 'user'),
     ]
     email = models.EmailField(
         verbose_name='Электронная почта',
+        max_length=254,
         unique=True,
     )
     username = models.CharField(
-        verbose_name='Имя пользователя',
+        verbose_name='Никнейм',
         max_length=150,
         unique=True
     )
+    firstname = models.CharField(
+        verbose_name='Имя',
+        max_length=150,
+        null=True,
+        blank=True
+    )
+    lastname = models.CharField(
+        verbose_name='Фамилия',
+        max_length=150,
+        null=True,
+        blank=True
+    )
     role = models.CharField(
         verbose_name='Уровень доступа',
-        max_length=50,
+        max_length=150,
         choices=ROLES,
-        default=USER
+        default='user'
     )
     bio = models.TextField(
         verbose_name='О себе',
@@ -46,11 +61,11 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.is_superuser or self.role == "Administrator"
+        return self.is_superuser or self.role == "admin"
 
     @property
     def is_moder(self):
-        return self.role == 'Moderator'
+        return self.role == 'moderator'
 
 
 class Category(models.Model):

@@ -11,17 +11,19 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Title, Review, User
-from api.serializers import (CategorySerializer,
-                             GenreSerializer, TitleSerializer,
-                             ReviewSerializer, CommentSerializer,
-                             TokenSerializer, RegistrationSerializer,
-                             UserSerializer)
-from api.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from api.serializers import (
+    CategorySerializer, CommentSerializer, EditSelfProfileSerializer,
+    GenreSerializer, RegistrationSerializer, ReviewSerializer,
+    TitleSerializer, TokenSerializer, UserSerializer
+)
+from api.permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrHigherOrReadOnly
 
 
-class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                        mixins.DestroyModelMixin, GenericViewSet):
-    permission_classes = (AllowAny, IsAdminOrReadOnly)
+class CategoriesViewSet(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin,
+    GenericViewSet, mixins.ListModelMixin
+):
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter, )
@@ -29,9 +31,11 @@ class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     pagination_class = LimitOffsetPagination
 
 
-class GenresViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                    mixins.DestroyModelMixin, GenericViewSet):
-    permission_classes = (AllowAny, IsAdminOrReadOnly)
+class GenresViewSet(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin,
+    GenericViewSet, mixins.ListModelMixin
+):
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter, )
@@ -40,7 +44,7 @@ class GenresViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    permission_classes = (AllowAny, IsAdminOrReadOnly)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (filters.SearchFilter, )
@@ -51,7 +55,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     '''Вьюсет модели Review.'''
     serializer_class = ReviewSerializer
-    permission_classes = [IsOwnerOrReadOnly, IsAdminOrReadOnly,]
+    permission_classes = (IsAuthorOrHigherOrReadOnly,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -67,7 +71,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     '''Вьюсет модели Comment.'''
     serializer_class = CommentSerializer
-    permission_classes = [IsOwnerOrReadOnly, IsAdminOrReadOnly,]
+    permission_classes = (IsAuthorOrHigherOrReadOnly,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -81,51 +85,54 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-    @api_view(['POST'])
-    @permission_classes([AllowAny])
-    def register(request):
-        serializer = RegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        user = get_object_or_404(
-            User,
-            username=serializer.validated_data['username']
-        )
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            subject='Код подтверждения для регистрации в YaMDb',
-            message=f'Your confirmation code: {confirmation_code}',
-            from_email=None,
-            recipient_list=[
-                user.email,
-            ]
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register(request):
+    serializer = RegistrationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    user = get_object_or_404(
+        User,
+        username=serializer.validated_data['username']
+    )
+    confirmation_code = default_token_generator.make_token(user)
+    send_mail(
+        subject='Код подтверждения для регистрации в YaMDb',
+        message=f'Your confirmation code: {confirmation_code}',
+        from_email=None,
+        recipient_list=[
+            user.email,
+        ]
+    )
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    @api_view(['POST'])
-    @permission_classes([AllowAny])
-    def get_token(request):
-        serializer = TokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(
-            User,
-            username=serializer.validated_data['username']
-        )
-        if default_token_generator.check_token(
-            user, serializer.validated_data['confirmation_code']
-        ):
-            token = AccessToken.for_user(user)
-            return Response({'token': str(token)}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_token(request):
+    serializer = TokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = get_object_or_404(
+        User,
+        username=serializer.validated_data['username']
+    )
+    if default_token_generator.check_token(
+        user, serializer.validated_data['confirmation_code']
+    ):
+        token = AccessToken.for_user(user)
+        return Response({'token': str(token)}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    http_method_names = ['delete', 'get', 'post', 'patch']
     lookup_field = 'username'
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = LimitOffsetPagination
-    permission_classes = (AllowAny,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAdmin,)
 
     @action(
         methods=[
@@ -135,7 +142,7 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=False,
         url_path='me',
         permission_classes=[IsAuthenticated],
-        serializer_class=UserSerializer,
+        serializer_class=EditSelfProfileSerializer,
     )
     def users_own_profile(self, request):
         user = request.user

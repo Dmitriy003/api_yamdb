@@ -23,7 +23,6 @@ class TitleSerializer(serializers.ModelSerializer):
     )
     genre = serializers.SlugRelatedField(
         read_only=True,
-        queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
     )
@@ -104,6 +103,20 @@ class RegistrationSerializer(serializers.ModelSerializer):
                 'Нельзя использовать "me" в качестве имени пользователя.'
             )
         return data
+
+
+class EditSelfProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role"
+        )
+        model = User
+        read_only_fields = ('role',)
 
 
 class TokenSerializer(serializers.ModelSerializer):
