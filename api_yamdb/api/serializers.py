@@ -2,7 +2,7 @@ import datetime
 
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Title, Review, Comment
+from reviews.models import Category, Genre, Title, Review, Comment, User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -23,14 +23,13 @@ class TitleSerializer(serializers.ModelSerializer):
     )
     genre = serializers.SlugRelatedField(
         read_only=True,
-        queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
     )
 
     def validate(self, data):
         if data['year'] > datetime.datetime.now().year:
-            raise serializers.ValidationError("произведение из будущего? нет")
+            raise serializers.ValidationError('произведение из будущего? нет')
         return data
 
     class Meta:
@@ -50,7 +49,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         ).exists():
             raise serializers.ValidationError(
                 'Вы уже оставляли отзыв на это произведение.')
-        review = Review.objects.create(**validated_data,)
+        review = Review.objects.create(**validated_data, )
         return review
 
     class Meta:
@@ -63,7 +62,68 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username',
     )
-    
+
     class Meta:
         fields = '__all__'
         model = Comment
+
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+
+    def validate(self, data):
+        '''Нельзя использовать "me" в качестве имени пользователя.'''
+        if data.get('username') == 'me':
+            raise serializers.ValidationError(
+                'Нельзя использовать "me" в качестве имени пользователя.'
+            )
+        return data
+
+
+class RegistrationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('email', 'username')
+
+    def validate(self, data):
+        '''Нельзя использовать "me" в качестве имени пользователя.'''
+        if data.get('username') == 'me':
+            raise serializers.ValidationError(
+                'Нельзя использовать "me" в качестве имени пользователя.'
+            )
+        return data
+
+
+class EditSelfProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role"
+        )
+        model = User
+        read_only_fields = ('role',)
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=100)
+    confirmation_code = serializers.CharField(max_length=50)
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
