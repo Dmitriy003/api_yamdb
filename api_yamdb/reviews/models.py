@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import (
     MaxValueValidator, MinValueValidator
 )
@@ -22,7 +23,8 @@ class User(AbstractUser):
     username = models.CharField(
         verbose_name='Никнейм',
         max_length=150,
-        unique=True
+        unique=True,
+        validators=[UnicodeUsernameValidator(),]
     )
     firstname = models.CharField(
         verbose_name='Имя',
@@ -49,6 +51,8 @@ class User(AbstractUser):
     )
 
     class Meta:
+        ordering = ('id',)
+        unique_together = ('username', 'email',)
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
@@ -61,7 +65,7 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.is_superuser or self.role == "admin"
+        return self.is_superuser or self.is_staff or self.role == "admin"
 
     @property
     def is_moder(self):

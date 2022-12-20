@@ -87,11 +87,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 def register(request):
     serializer = RegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save()
-    user = get_object_or_404(
-        User,
-        username=serializer.validated_data['username']
-    )
+    user, exists = User.objects.get_or_create(**serializer.data)
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
         subject='Код подтверждения для регистрации в YaMDb',

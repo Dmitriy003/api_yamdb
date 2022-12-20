@@ -1,5 +1,7 @@
 import datetime
 
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 
 from reviews.models import Category, Genre, Title, Review, Comment, User
@@ -81,22 +83,34 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        """Нельзя использовать "me" в качестве имени пользователя."""
-        if data.get('username') == 'me':
+        """
+        Валидация никнейма.
+        """
+        username=data.get('username')
+        if username == 'me':
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве имени пользователя.'
             )
         return data
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'username')
+class RegistrationSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[UnicodeUsernameValidator(),]
+    )
+    email = serializers.EmailField(
+        required=True,
+        max_length=254,
+    )
 
     def validate(self, data):
-        """Нельзя использовать "me" в качестве имени пользователя."""
-        if data.get('username') == 'me':
+        """
+        Валидация полей при регистрации пользователя.
+        """
+        username=data.get('username')
+        if username == 'me':
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве имени пользователя.'
             )
