@@ -68,9 +68,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = (
@@ -83,7 +81,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        '''Нельзя использовать "me" в качестве имени пользователя.'''
+        """Нельзя использовать "me" в качестве имени пользователя."""
         if data.get('username') == 'me':
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве имени пользователя.'
@@ -92,13 +90,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('email', 'username')
 
     def validate(self, data):
-        '''Нельзя использовать "me" в качестве имени пользователя.'''
+        """Нельзя использовать "me" в качестве имени пользователя."""
         if data.get('username') == 'me':
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве имени пользователя.'

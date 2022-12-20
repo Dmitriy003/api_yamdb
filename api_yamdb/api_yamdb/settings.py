@@ -2,6 +2,9 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from django.conf.global_settings import DATETIME_INPUT_FORMATS
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -124,6 +127,11 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+
+DATETIME_INPUT_FORMATS += (
+    '%Y-%m-%dT%H:%M:%S.%fz',
+)
 
 # Static files (CSS, JavaScript, Images)
 
