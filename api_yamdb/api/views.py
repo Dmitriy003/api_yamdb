@@ -1,5 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 
 from rest_framework import filters, mixins, status, viewsets
@@ -87,10 +88,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 def register(request):
     serializer = RegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user, exists = User.objects.get_or_create(**serializer.data)
+    try:
+        user, exists = User.objects.get_or_create(**serializer.data)
+    except IntegrityError:
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
-        subject='Код подтверждения для регистрации в YaMDb',
+        subject='Confirmation code for registration in YaMDb',
         message=f'Your confirmation code: {confirmation_code}',
         from_email=None,
         recipient_list=[
