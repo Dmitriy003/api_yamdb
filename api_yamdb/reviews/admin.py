@@ -1,12 +1,11 @@
-from django.contrib.auth import admin
+import import_export.widgets
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from django.contrib import admin
+from import_export.fields import Field
 
-from reviews.models import Category, Genre, Title, GenreTitle, User
-
-admin.site.register(User)
+from reviews.models import *
 
 
 class CategoryResource(resources.ModelResource):
@@ -84,4 +83,74 @@ class GenreTitleAdmin(ImportExportModelAdmin):
     list_display = (
         'genre_id',
         'title_id',
+    )
+
+
+class ReviewResource(resources.ModelResource):
+    class Meta:
+        model = Review
+        fields = (
+            'id',
+            'title_id',
+            'text',
+            'author',
+            'score',
+            'pub_date',
+        )
+
+
+@admin.register(Review)
+class ReviewAdmin(ImportExportModelAdmin):
+    resource_classes = [ReviewResource]
+    list_display = (
+        'id',
+        'title_id',
+        'text',
+    )
+
+
+class CommentResource(resources.ModelResource):
+    class Meta:
+        model = Comment
+        fields = (
+            'id',
+            'review_id',
+            'text',
+            'author',
+            'pub_date',
+        )
+
+
+@admin.register(Comment)
+class ReviewAdmin(ImportExportModelAdmin):
+    resource_classes = [CommentResource]
+    list_display = (
+        'id',
+        'review_id',
+        'text',
+    )
+
+
+class UserResource(resources.ModelResource):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'role',
+            'bio',
+            'first_name',
+            'last_name',
+        )
+
+
+@admin.register(User)
+class UserAdmin(ImportExportModelAdmin):
+    resource_classes = [UserResource]
+    list_display = (
+        'id',
+        'username',
+        'email',
+        'role',
     )
