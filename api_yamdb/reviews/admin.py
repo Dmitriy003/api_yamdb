@@ -93,7 +93,7 @@ class ReviewResource(resources.ModelResource):
             'id',
             'title_id',
             'text',
-            'author',
+            'author_id',
             'score',
             'pub_date',
         )
