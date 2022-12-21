@@ -132,15 +132,15 @@ class GenreTitle(models.Model):
 
 class Review(models.Model):
     """ Модель отзыва на произведение."""
-    title_id = models.ForeignKey(Title,
+    title = models.ForeignKey(Title,
                                  on_delete=models.CASCADE,
-                                 related_name='title',
+                                 related_name='reviews',
                                  verbose_name='Заголовок отзыва',
                                  )
     text = models.TextField(verbose_name='Текст отзыва')
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
-                               related_name='review_author',
+                               related_name='reviews',
                                verbose_name='Автор')
     score = models.PositiveSmallIntegerField(verbose_name='Оценка',
                                              validators=[MinValueValidator(1),
@@ -148,18 +148,29 @@ class Review(models.Model):
                                                              10)])
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
+    class Meta:
+        ordering = ['-pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='just_one_review_per_author')
+        ]
+
     def __str__(self):
-        return self.text
+        return self.text[:15]
 
 
 class Comment(models.Model):
-    review_id = models.ForeignKey(Review, on_delete=models.CASCADE)
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField(verbose_name='Текст комментария')
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
-                               related_name='comment_author',
+                               related_name='comments',
                                verbose_name='Автор комментария', )
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-pub_date']
 
     def __str__(self):
         return self.text
