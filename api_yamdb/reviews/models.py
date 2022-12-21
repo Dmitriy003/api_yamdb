@@ -140,12 +140,14 @@ class Review(models.Model):
     text = models.TextField(verbose_name='Текст отзыва')
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
-                               related_name='reviewы',
+                               related_name='reviews',
                                verbose_name='Автор')
     score = models.PositiveSmallIntegerField(verbose_name='Оценка',
                                              validators=[MaxValueValidator(10),
-                                                         MinValueValidator(
-                                                             1)])
+                                                         MinValueValidator(1)],
+                                             blank=True,
+                                             null=True,
+                                             default=0)
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):

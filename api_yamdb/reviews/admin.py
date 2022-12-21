@@ -91,7 +91,7 @@ class ReviewResource(resources.ModelResource):
         model = Review
         fields = (
             'id',
-            'title',
+            'title_id',
             'text',
             'author',
             'score',
@@ -106,6 +106,9 @@ class ReviewAdmin(ImportExportModelAdmin):
         'id',
         'title_id',
         'text',
+        'author',
+        'score',
+        'pub_date',
     )
 
 
@@ -122,7 +125,7 @@ class CommentResource(resources.ModelResource):
 
 
 @admin.register(Comment)
-class ReviewAdmin(ImportExportModelAdmin):
+class CommentAdmin(ImportExportModelAdmin):
     resource_classes = [CommentResource]
     list_display = (
         'id',

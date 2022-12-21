@@ -55,7 +55,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет модели Review."""
     serializer_class = ReviewSerializer
-    permission_classes = [AdminModeratorAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrHigherOrReadOnly]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -71,7 +71,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет модели Comment."""
     serializer_class = CommentSerializer
-    permission_classes = [AdminModeratorAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrHigherOrReadOnly]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
