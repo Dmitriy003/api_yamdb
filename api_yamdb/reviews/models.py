@@ -4,6 +4,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import (
     MaxValueValidator, MinValueValidator
 )
+from django.db.models import Avg
 
 
 class User(AbstractUser):
@@ -24,7 +25,7 @@ class User(AbstractUser):
         verbose_name='Никнейм',
         max_length=150,
         unique=True,
-        validators=[UnicodeUsernameValidator(),]
+        validators=[UnicodeUsernameValidator(), ]
     )
     firstname = models.CharField(
         verbose_name='Имя',
@@ -97,6 +98,7 @@ class Title(models.Model):
         db_index=True
     )
     description = models.CharField(blank=True, null=True, max_length=256)
+
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -133,10 +135,10 @@ class GenreTitle(models.Model):
 class Review(models.Model):
     """ Модель отзыва на произведение."""
     title = models.ForeignKey(Title,
-                                 on_delete=models.CASCADE,
-                                 related_name='reviews',
-                                 verbose_name='Заголовок отзыва',
-                                 )
+                              on_delete=models.CASCADE,
+                              related_name='reviews',
+                              verbose_name='Заголовок отзыва',
+                              )
     text = models.TextField(verbose_name='Текст отзыва')
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
@@ -161,7 +163,8 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='comments')
+    review = models.ForeignKey(Review, on_delete=models.CASCADE,
+                               related_name='comments')
     text = models.TextField(verbose_name='Текст комментария')
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,

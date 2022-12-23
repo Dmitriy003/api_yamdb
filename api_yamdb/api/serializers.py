@@ -9,34 +9,48 @@ from reviews.models import Category, Genre, Title, Review, Comment, User
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        fields = '__all__'
+        exclude = ('id',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = '__all__'
+        exclude = ('id',)
         model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для UNSAFE METHODS"""
     category = serializers.SlugRelatedField(
-        read_only=True, slug_field='slug'
+        queryset=Category.objects.all(), slug_field='slug'
     )
     genre = serializers.SlugRelatedField(
-        read_only=True,
+        queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
     )
+    rating = serializers.IntegerField(read_only=True)
 
-    def validate(self, data):
-        if data['year'] > datetime.datetime.now().year:
+    def validate_year(self, year):
+        if year > datetime.datetime.now().year:
             raise serializers.ValidationError('произведение из будущего? нет')
-        return data
+        return year
 
     class Meta:
-        fields = '__all__'
         model = Title
+        fields = ('id', 'name', 'year', 'description',
+                  'rating', 'category', 'genre')
+
+
+class TitleShowSerializer(serializers.ModelSerializer):
+    """Сериализатор для SAFE METHODS"""
+    category = CategorySerializer(required=False)
+    genre = GenreSerializer(many=True, required=False)
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = '__all__'
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -86,7 +100,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Валидация никнейма.
         """
-        username=data.get('username')
+        username = data.get('username')
         if username == 'me':
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве имени пользователя.'
@@ -98,7 +112,7 @@ class RegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
         max_length=150,
-        validators=[UnicodeUsernameValidator(),]
+        validators=[UnicodeUsernameValidator(), ]
     )
     email = serializers.EmailField(
         required=True,
@@ -109,7 +123,7 @@ class RegistrationSerializer(serializers.Serializer):
         """
         Валидация полей при регистрации пользователя.
         """
-        username=data.get('username')
+        username = data.get('username')
         if username == 'me':
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве имени пользователя.'
