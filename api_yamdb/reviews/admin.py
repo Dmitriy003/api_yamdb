@@ -1,11 +1,10 @@
-import import_export.widgets
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from django.contrib import admin
-from import_export.fields import Field
 
-from reviews.models import *
+from reviews.models import (User, Category, Genre,
+                            Title, GenreTitle, Review, Comment)
 
 
 class CategoryResource(resources.ModelResource):

@@ -4,7 +4,6 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import (
     MaxValueValidator, MinValueValidator
 )
-from django.db.models import Avg
 
 
 class User(AbstractUser):
