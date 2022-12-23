@@ -1,25 +1,26 @@
+import django_filters
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-
-from rest_framework import filters, mixins, status, viewsets, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, \
     IsAuthenticatedOrReadOnly
-from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, Genre, Title, Review, User
+from api.permissions import IsAdmin, IsAdminOrReadOnly, \
+    IsAuthorOrHigherOrReadOnly
 from api.serializers import (
     CategorySerializer, CommentSerializer, EditSelfProfileSerializer,
     GenreSerializer, RegistrationSerializer, ReviewSerializer,
     TitleSerializer, TitleShowSerializer, TokenSerializer, UserSerializer
 )
-from api.permissions import IsAdmin, IsAdminOrReadOnly, \
-    IsAuthorOrHigherOrReadOnly
+from reviews.models import Category, Genre, Title, Review, User
 
 
 class CategoriesViewSet(
@@ -29,6 +30,7 @@ class CategoriesViewSet(
     permission_classes = (AllowAny, IsAdminOrReadOnly)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     ordering_fields = ('name',)
@@ -41,16 +43,34 @@ class GenresViewSet(
     permission_classes = (AllowAny, IsAdminOrReadOnly)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     ordering_fields = ('name',)
 
 
+class TitleFilter(django_filters.FilterSet):
+    genre = django_filters.Filter(
+        field_name='genre__slug',
+        lookup_expr='icontains'
+    )
+    category = django_filters.Filter(
+        field_name='category__slug',
+        lookup_expr='icontains'
+    )
+
+    class Meta:
+        fields = ('genre', 'name', 'year', 'category')
+        model = Title
+
+
 class TitlesViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name', 'year', 'category', 'genre',)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter,
+                       filters.OrderingFilter)
+    filterset_class = TitleFilter
+    search_fields = ('name', 'year', 'category', 'genre')
     ordering_fields = ('name', 'year',)
 
     def get_serializer_class(self):
