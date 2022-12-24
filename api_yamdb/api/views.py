@@ -28,7 +28,7 @@ class CategoriesViewSet(
     GenericViewSet, mixins.ListModelMixin
 ):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
@@ -41,7 +41,7 @@ class GenresViewSet(
     GenericViewSet, mixins.ListModelMixin
 ):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
@@ -66,7 +66,7 @@ class TitleFilter(django_filters.FilterSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
-    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score')).order_by('-id')
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,
                        filters.OrderingFilter)
     filterset_class = TitleFilter
