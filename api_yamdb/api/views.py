@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 
+from api.filters import TitleFilter
 from api.permissions import (
     IsAdmin, IsAdminOrReadOnly, IsAuthorOrHigherOrReadOnly
 )
@@ -48,21 +49,6 @@ class GenresViewSet(
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     ordering_fields = ('name',)
-
-
-class TitleFilter(django_filters.FilterSet):
-    genre = django_filters.Filter(
-        field_name='genre__slug',
-        lookup_expr='icontains'
-    )
-    category = django_filters.Filter(
-        field_name='category__slug',
-        lookup_expr='icontains'
-    )
-
-    class Meta:
-        fields = ('genre', 'name', 'year', 'category')
-        model = Title
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
