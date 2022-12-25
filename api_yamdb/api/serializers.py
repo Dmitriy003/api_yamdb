@@ -57,15 +57,18 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True, slug_field='username'
     )
 
-    def create(self, validated_data):
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+        user = self.context['request'].user
+        title_id = self.context['view'].kwargs.get('title_id')
         if Review.objects.filter(
-            author=self.context['request'].user,
-            title=validated_data.get('title')
+            author_id=user.id, title_id=title_id
         ).exists():
             raise serializers.ValidationError(
-                'Вы уже оставляли отзыв на это произведение.')
-        review = Review.objects.create(**validated_data, )
-        return review
+                'Вы уже оставляли отзыв на данное произведение')
+        return data
+
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
@@ -84,6 +87,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор данных для модели User."""
     class Meta:
         model = User
         fields = (
@@ -98,6 +102,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """
         Валидация никнейма.
+        Username "me" запрещен.
         """
         username = data.get('username')
         if username == 'me':
@@ -108,6 +113,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RegistrationSerializer(serializers.Serializer):
+    """Сериализатор данных при регистрации пользователя."""
     username = serializers.CharField(
         required=True,
         max_length=150,
@@ -121,16 +127,31 @@ class RegistrationSerializer(serializers.Serializer):
     def validate(self, data):
         """
         Валидация полей при регистрации пользователя.
+        1) Username "me" запрещен
+        2) Неуникальный username запрещен
+        3) Неуникальный email запрещен
         """
         username = data.get('username')
+        email = data.get('email')
         if username == 'me':
             raise serializers.ValidationError(
                 'Нельзя использовать "me" в качестве имени пользователя.'
+            )
+        if User.objects.filter(username=username, email=email).exists():
+            return data
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                'Другой пользователь с таким username уже существует.'
+            )
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                'Другой пользователь с таким email уже существует.'
             )
         return data
 
 
 class EditSelfProfileSerializer(serializers.ModelSerializer):
+    """Сериализатор данных при редактировании профиля пользователя."""
     class Meta:
         fields = (
             "username",
@@ -143,8 +164,21 @@ class EditSelfProfileSerializer(serializers.ModelSerializer):
         model = User
         read_only_fields = ('role',)
 
+    def validate(self, data):
+        """
+        Валидация никнейма.
+        Username "me" запрещен.
+        """
+        username = data.get('username')
+        if username == 'me':
+            raise serializers.ValidationError(
+                'Нельзя использовать "me" в качестве имени пользователя.'
+            )
+        return data
+
 
 class TokenSerializer(serializers.ModelSerializer):
+    """Сериализатор данных при отправке токена."""
     username = serializers.CharField(max_length=100)
     confirmation_code = serializers.CharField(max_length=50)
 

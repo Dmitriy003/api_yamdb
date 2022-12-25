@@ -1,20 +1,21 @@
 import django_filters
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated, \
-    IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api.permissions import IsAdmin, IsAdminOrReadOnly, \
-    IsAuthorOrHigherOrReadOnly
+from api.permissions import (
+    IsAdmin, IsAdminOrReadOnly, IsAuthorOrHigherOrReadOnly
+)
 from api.serializers import (
     CategorySerializer, CommentSerializer, EditSelfProfileSerializer,
     GenreSerializer, RegistrationSerializer, ReviewSerializer,
@@ -28,7 +29,7 @@ class CategoriesViewSet(
     GenericViewSet, mixins.ListModelMixin
 ):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
@@ -41,7 +42,7 @@ class GenresViewSet(
     GenericViewSet, mixins.ListModelMixin
 ):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
@@ -66,7 +67,7 @@ class TitleFilter(django_filters.FilterSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
-    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score')).order_by('-id')
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,
                        filters.OrderingFilter)
     filterset_class = TitleFilter
@@ -116,12 +117,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
+    """Вью-функция для получения письма с кодом подтверждения."""
     serializer = RegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    try:
-        user, exists = User.objects.get_or_create(**serializer.data)
-    except IntegrityError:
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+    user, _ = User.objects.get_or_create(**serializer.data)
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
         subject='Confirmation code for registration in YaMDb',
@@ -137,6 +136,7 @@ def register(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_token(request):
+    """Вью-функция для получения токена."""
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = get_object_or_404(
@@ -152,6 +152,7 @@ def get_token(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """Вьюсет модели User."""
     http_method_names = ['delete', 'get', 'post', 'patch']
     lookup_field = 'username'
     queryset = User.objects.all()
