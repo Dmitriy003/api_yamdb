@@ -69,7 +69,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Вы уже оставляли отзыв на данное произведение')
         return data
 
-
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
         model = Review
@@ -88,6 +87,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор данных для модели User."""
+
     class Meta:
         model = User
         fields = (
@@ -152,6 +152,7 @@ class RegistrationSerializer(serializers.Serializer):
 
 class EditSelfProfileSerializer(serializers.ModelSerializer):
     """Сериализатор данных при редактировании профиля пользователя."""
+
     class Meta:
         fields = (
             "username",

@@ -1,4 +1,3 @@
-import django_filters
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -53,7 +52,8 @@ class GenresViewSet(
 
 class TitlesViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny, IsAdminOrReadOnly)
-    queryset = Title.objects.all().annotate(rating=Avg('reviews__score')).order_by('-id')
+    queryset = (Title.objects.all()
+                .annotate(rating=Avg('reviews__score')).order_by('-id'))
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,
                        filters.OrderingFilter)
     filterset_class = TitleFilter
